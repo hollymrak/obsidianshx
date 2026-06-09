@@ -2009,7 +2009,7 @@ function KeyPicker:Update()
             KeybindsToggle:SetNormal(true)
         end
 
-        -- ГЛАВНОЕ ИЗМЕНЕНИЕ ТУТ: вместо "Toggle" пишем "T"
+        -- Вместо "Toggle" пишем "T"
         local modeText = (KeyPicker.Mode == "Toggle" and "T") or KeyPicker.Mode
         KeybindsToggle:SetText(("[%s] %s (%s)"):format(KeyPicker.Value, KeyPicker.Text, modeText))
         
