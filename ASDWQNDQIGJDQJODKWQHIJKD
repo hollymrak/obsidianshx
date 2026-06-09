@@ -1985,33 +1985,42 @@ do
         end
 
         function KeyPicker:Update()
-            KeyPicker:Display()
+    KeyPicker:Display()
 
-            if Info.NoUI then
-                return
-            end
+    if Info.NoUI then
+        return
+    end
 
-            if KeyPicker.Mode == "Toggle" and ParentObj.Type == "Toggle" and ParentObj.Disabled then
-                KeybindsToggle:SetVisibility(false)
-                return
-            end
+    if KeyPicker.Mode == "Toggle" and ParentObj.Type == "Toggle" and ParentObj.Disabled then
+        KeybindsToggle:SetVisibility(false)
+        return
+    end
 
-            local State = KeyPicker:GetState()
-            local ShowToggle = Library.ShowToggleFrameInKeybinds and KeyPicker.Mode == "Toggle"
-            if KeybindsToggle.Loaded then
-                if ShowToggle then
-                    KeybindsToggle:SetNormal(false)
-                else
-                    KeybindsToggle:SetNormal(true)
-                end
+    local State = KeyPicker:GetState()
+    local ShowToggle = Library.ShowToggleFrameInKeybinds and KeyPicker.Mode == "Toggle"
+    
 
-                KeybindsToggle:SetText(("[%s] %s (%s)"):format(KeyPicker.Value, KeyPicker.Text, KeyPicker.Mode))
-                KeybindsToggle:SetVisibility(true)
-                KeybindsToggle:Display(State)
-            end
-
-            Library:UpdateKeybindFrame()
+    local hasValidKey = KeyPicker.Value ~= "None" and KeyPicker.Value ~= "Unknown"
+    
+    if KeybindsToggle.Loaded then
+        if ShowToggle then
+            KeybindsToggle:SetNormal(false)
+        else
+            KeybindsToggle:SetNormal(true)
         end
+
+
+        local modeText = (KeyPicker.Mode == "Toggle" and "T") or KeyPicker.Mode
+        KeybindsToggle:SetText(("[%s] %s (%s)"):format(KeyPicker.Value, KeyPicker.Text, modeText))
+        
+        KeybindsToggle:SetVisibility(hasValidKey and true)
+        if hasValidKey then
+            KeybindsToggle:Display(State)
+        end
+    end
+
+    Library:UpdateKeybindFrame()
+end
 
         function KeyPicker:GetState()
             if KeyPicker.Mode == "Always" then
