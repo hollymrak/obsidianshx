@@ -1984,7 +1984,7 @@ do
             Picker.Size = UDim2.fromOffset(X + 9 * Library.DPIScale, Y + 4 * Library.DPIScale)
         end
 
-        function KeyPicker:Update()
+function KeyPicker:Update()
     KeyPicker:Display()
 
     if Info.NoUI then
@@ -1999,7 +1999,7 @@ do
     local State = KeyPicker:GetState()
     local ShowToggle = Library.ShowToggleFrameInKeybinds and KeyPicker.Mode == "Toggle"
     
-
+    -- Проверяем есть ли клавиша
     local hasValidKey = KeyPicker.Value ~= "None" and KeyPicker.Value ~= "Unknown"
     
     if KeybindsToggle.Loaded then
@@ -2009,7 +2009,7 @@ do
             KeybindsToggle:SetNormal(true)
         end
 
-
+        -- ГЛАВНОЕ ИЗМЕНЕНИЕ ТУТ: вместо "Toggle" пишем "T"
         local modeText = (KeyPicker.Mode == "Toggle" and "T") or KeyPicker.Mode
         KeybindsToggle:SetText(("[%s] %s (%s)"):format(KeyPicker.Value, KeyPicker.Text, modeText))
         
