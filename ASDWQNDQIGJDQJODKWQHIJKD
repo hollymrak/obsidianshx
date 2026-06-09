@@ -1852,6 +1852,10 @@ function Funcs:AddKeyPicker(Idx, Info)
             TextSize = 14,
             TextTransparency = 0.5,
             Parent = Holder,
+
+            DPIExclude = {
+                Size = true,
+            },
         })
 
         local Checkbox = New("Frame", {
@@ -1897,13 +1901,17 @@ function Funcs:AddKeyPicker(Idx, Info)
 
         function KeybindsToggle:SetNormal(Normal)
             KeybindsToggle.Normal = Normal
+
             Holder.Active = not Normal
             Label.Position = Normal and UDim2.fromOffset(0, 0) or UDim2.fromOffset(22 * Library.DPIScale, 0)
             Checkbox.Visible = not Normal
         end
 
         Holder.MouseButton1Click:Connect(function()
-            if KeybindsToggle.Normal then return end
+            if KeybindsToggle.Normal then
+                return
+            end
+
             KeyPicker.Toggled = not KeyPicker.Toggled
             KeyPicker:DoClick()
         end)
@@ -1923,6 +1931,7 @@ function Funcs:AddKeyPicker(Idx, Info)
     local ModeButtons = {}
     for _, Mode in pairs(Info.Modes) do
         local ModeButton = {}
+
         local Button = New("TextButton", {
             BackgroundColor3 = "MainColor",
             BackgroundTransparency = 1,
@@ -1934,17 +1943,21 @@ function Funcs:AddKeyPicker(Idx, Info)
         })
 
         function ModeButton:Select()
-            for _, Btn in pairs(ModeButtons) do
-                Btn:Deselect()
+            for _, Button in pairs(ModeButtons) do
+                Button:Deselect()
             end
+
             KeyPicker.Mode = Mode
+
             Button.BackgroundTransparency = 0
             Button.TextTransparency = 0
+
             MenuTable:Close()
         end
 
         function ModeButton:Deselect()
             KeyPicker.Mode = nil
+
             Button.BackgroundTransparency = 1
             Button.TextTransparency = 0.5
         end
@@ -1956,19 +1969,28 @@ function Funcs:AddKeyPicker(Idx, Info)
         if KeyPicker.Mode == Mode then
             ModeButton:Select()
         end
+
         ModeButtons[Mode] = ModeButton
     end
 
     function KeyPicker:Display()
-        if Library.Unloaded then return end
-        local X, Y = Library:GetTextBounds(KeyPicker.Value, Picker.FontFace, Picker.TextSize, ToggleLabel.AbsoluteSize.X)
+        if Library.Unloaded then
+            return
+        end
+
+        local X, Y =
+            Library:GetTextBounds(KeyPicker.Value, Picker.FontFace, Picker.TextSize, ToggleLabel.AbsoluteSize.X)
         Picker.Text = KeyPicker.Value
         Picker.Size = UDim2.fromOffset(X + 9 * Library.DPIScale, Y + 4 * Library.DPIScale)
     end
 
     function KeyPicker:Update()
         KeyPicker:Display()
-        if Info.NoUI then return end
+
+        if Info.NoUI then
+            return
+        end
+
         if KeyPicker.Mode == "Toggle" and ParentObj.Type == "Toggle" and ParentObj.Disabled then
             KeybindsToggle:SetVisibility(false)
             return
@@ -1976,7 +1998,6 @@ function Funcs:AddKeyPicker(Idx, Info)
 
         local State = KeyPicker:GetState()
         local ShowToggle = Library.ShowToggleFrameInKeybinds and KeyPicker.Mode == "Toggle"
-        local hasValidKey = KeyPicker.Value ~= "None" and KeyPicker.Value ~= "Unknown"
         
         if KeybindsToggle.Loaded then
             if ShowToggle then
@@ -1984,13 +2005,12 @@ function Funcs:AddKeyPicker(Idx, Info)
             else
                 KeybindsToggle:SetNormal(true)
             end
-            local modeText = (KeyPicker.Mode == "Toggle" and "T") or KeyPicker.Mode
-            KeybindsToggle:SetText((" [%s] %s (%s)"):format(KeyPicker.Value, KeyPicker.Text, modeText))
-            KeybindsToggle:SetVisibility(hasValidKey)
-            if hasValidKey then
-                KeybindsToggle:Display(State)
-            end
+
+            KeybindsToggle:SetText(("[%s] %s (%s)"):format(KeyPicker.Value, KeyPicker.Text, KeyPicker.Mode))
+            KeybindsToggle:SetVisibility(true)
+            KeybindsToggle:Display(State)
         end
+
         Library:UpdateKeybindFrame()
     end
 
@@ -1999,12 +2019,17 @@ function Funcs:AddKeyPicker(Idx, Info)
             return true
         elseif KeyPicker.Mode == "Hold" then
             local Key = KeyPicker.Value
-            if Key == "None" then return false end
+            if Key == "None" then
+                return false
+            end
+
             if Key == "MB1" or Key == "MB2" then
                 return Key == "MB1" and UserInputService:IsMouseButtonPressed(Enum.UserInputType.MouseButton1)
                     or Key == "MB2" and UserInputService:IsMouseButtonPressed(Enum.UserInputType.MouseButton2)
             end
-            return UserInputService:IsKeyDown(Enum.KeyCode[KeyPicker.Value]) and not UserInputService:GetFocusedTextBox()
+
+            return UserInputService:IsKeyDown(Enum.KeyCode[KeyPicker.Value])
+                and not UserInputService:GetFocusedTextBox()
         else
             return KeyPicker.Toggled
         end
@@ -2022,16 +2047,19 @@ function Funcs:AddKeyPicker(Idx, Info)
         if ParentObj.Type == "Toggle" and KeyPicker.SyncToggleState then
             ParentObj:SetValue(KeyPicker.Toggled)
         end
+
         Library:SafeCallback(KeyPicker.Callback, KeyPicker.Toggled)
         Library:SafeCallback(KeyPicker.Changed, KeyPicker.Toggled)
     end
 
     function KeyPicker:SetValue(Data)
         local Key, Mode = Data[1], Data[2]
+
         KeyPicker.Value = Key
         if ModeButtons[Mode] then
             ModeButtons[Mode]:Select()
         end
+
         KeyPicker:Update()
     end
 
@@ -2042,12 +2070,18 @@ function Funcs:AddKeyPicker(Idx, Info)
 
     local Picking = false
     Picker.MouseButton1Click:Connect(function()
-        if Picking then return end
+        if Picking then
+            return
+        end
+
         Picking = true
+
         Picker.Text = "..."
         Picker.Size = UDim2.fromOffset(29 * Library.DPIScale, 18 * Library.DPIScale)
+
         local Input = UserInputService.InputBegan:Wait()
         local Key = "Unknown"
+
         if Input.UserInputType == Enum.UserInputType.Keyboard then
             Key = Input.KeyCode == Enum.KeyCode.Escape and "None" or Input.KeyCode.Name
         elseif Input.UserInputType == Enum.UserInputType.MouseButton1 then
@@ -2055,23 +2089,43 @@ function Funcs:AddKeyPicker(Idx, Info)
         elseif Input.UserInputType == Enum.UserInputType.MouseButton2 then
             Key = "MB2"
         end
+
         KeyPicker.Value = Key
         KeyPicker:Update()
-        Library:SafeCallback(KeyPicker.ChangedCallback, Input.KeyCode == Enum.KeyCode.Unknown and Input.UserInputType or Input.KeyCode)
-        Library:SafeCallback(KeyPicker.Changed, Input.KeyCode == Enum.KeyCode.Unknown and Input.UserInputType or Input.KeyCode)
+
+        Library:SafeCallback(
+            KeyPicker.ChangedCallback,
+            Input.KeyCode == Enum.KeyCode.Unknown and Input.UserInputType or Input.KeyCode
+        )
+        Library:SafeCallback(
+            KeyPicker.Changed,
+            Input.KeyCode == Enum.KeyCode.Unknown and Input.UserInputType or Input.KeyCode
+        )
+
         RunService.RenderStepped:Wait()
         Picking = false
     end)
     Picker.MouseButton2Click:Connect(MenuTable.Toggle)
 
-    Library:GiveSignal(UserInputService.InputBegan:Connect(function(Input)
-        if KeyPicker.Mode == "Always" or KeyPicker.Value == "Unknown" or KeyPicker.Value == "None" or Picking or UserInputService:GetFocusedTextBox() then
+    Library:GiveSignal(UserInputService.InputBegan:Connect(function(Input: InputObject)
+        if
+            KeyPicker.Mode == "Always"
+            or KeyPicker.Value == "Unknown"
+            or KeyPicker.Value == "None"
+            or Picking
+            or UserInputService:GetFocusedTextBox()
+        then
             return
         end
+
         if KeyPicker.Mode == "Toggle" then
             local Key = KeyPicker.Value
+
             if Key == "MB1" or Key == "MB2" then
-                if Key == "MB1" and UserInputService:IsMouseButtonPressed(Enum.UserInputType.MouseButton1) or Key == "MB2" and UserInputService:IsMouseButtonPressed(Enum.UserInputType.MouseButton2) then
+                if
+                    Key == "MB1" and UserInputService:IsMouseButtonPressed(Enum.UserInputType.MouseButton1)
+                    or Key == "MB2" and UserInputService:IsMouseButtonPressed(Enum.UserInputType.MouseButton2)
+                then
                     KeyPicker.Toggled = not KeyPicker.Toggled
                     KeyPicker:DoClick()
                 end
@@ -2080,13 +2134,20 @@ function Funcs:AddKeyPicker(Idx, Info)
                 KeyPicker:DoClick()
             end
         end
+
         KeyPicker:Update()
     end))
 
     Library:GiveSignal(UserInputService.InputEnded:Connect(function()
-        if KeyPicker.Value == "Unknown" or KeyPicker.Value == "None" or Picking or UserInputService:GetFocusedTextBox() then
+        if
+            KeyPicker.Value == "Unknown"
+            or KeyPicker.Value == "None"
+            or Picking
+            or UserInputService:GetFocusedTextBox()
+        then
             return
         end
+
         KeyPicker:Update()
     end))
 
@@ -2097,6 +2158,7 @@ function Funcs:AddKeyPicker(Idx, Info)
     end
 
     Options[Idx] = KeyPicker
+
     return self
 end
 
@@ -5734,7 +5796,6 @@ end
         Library.Tabs[Name] = Tab
 
         return Tab
-    end
 
     function Window:AddKeyTab(Name)
         local TabButton: TextButton
