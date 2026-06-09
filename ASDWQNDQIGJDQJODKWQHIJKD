@@ -5562,18 +5562,42 @@ function Library:CreateWindow(WindowInfo)
                 end
 
                 --// Execution \\--
-                if not Tabbox.ActiveTab then
-                    Tab:Show()
-                end
+                    --// Execution \\--
+    if not Library.ActiveTab then
+        Tab:Show()
+    end
 
-                Button.MouseButton1Click:Connect(Tab.Show)
+    local function PlayTabSound()
+        local s = Instance.new("Sound")
+        s.SoundId = "rbxassetid://99979147606311"
+        s.Volume = 5
+        s.Parent = game:GetService("SoundService")
+        s:Play()
+        s.Ended:Connect(function() s:Destroy() end)
+    end
 
-                setmetatable(Tab, BaseGroupbox)
+    TabButton.MouseEnter:Connect(function()
+        Tab:Hover(true)
+    end)
+    TabButton.MouseLeave:Connect(function()
+        Tab:Hover(false)
+    end)
+    
 
-                Tabbox.Tabs[Name] = Tab
+    TabButton.MouseButton1Click:Connect(function()
+        PlayTabSound()
+        
+        if Library.ActiveTab == Tab then
+            Tab:Hide()
+        else
+            Tab:Show()
+        end
+    end)
 
-                return Tab
-            end
+    Library.Tabs[Name] = Tab
+
+    return Tab
+end
 
             if Info.Name then
                 Tab.Tabboxes[Info.Name] = Tabbox
